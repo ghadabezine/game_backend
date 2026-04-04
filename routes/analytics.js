@@ -42,7 +42,7 @@ router.post("/session/end", async (req, res) => {
 
     session.sessionEnd = new Date();
     session.duration = Math.floor(
-      (session.sessionEnd - session.sessionStart) / 1000
+      (session.sessionEnd - session.sessionStart) / 1000,
     );
     session.status = "ended";
 
@@ -82,12 +82,7 @@ router.post("/position", async (req, res) => {
   try {
     const { sessionId, x, y, z } = req.body;
 
-    if (
-      !sessionId ||
-      x === undefined ||
-      y === undefined ||
-      z === undefined
-    ) {
+    if (!sessionId || x === undefined || y === undefined || z === undefined) {
       return res.status(400).json({
         message: "sessionId, x, y, z are required",
       });
