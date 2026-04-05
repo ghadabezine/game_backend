@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const router = express.Router();
 
 const Session = require("../models/Session");
@@ -107,6 +108,54 @@ router.get("/sessions", async (req, res) => {
   try {
     const sessions = await Session.find().sort({ createdAt: -1 });
     res.json(sessions);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get("/sessions/:id/events", async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid session id" });
+    }
+    const events = await Event.find({ sessionId: id })
+      .sort({ timestamp: 1 })
+      .select("_id eventType value timestamp")
+      .lean();
+    res.json(events);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get("/sessions/:id/positions", async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid session id" });
+    }
+    const positions = await Position.find({ sessionId: id })
+      .sort({ timestamp: 1 })
+      .select("_id x y z timestamp")
+      .lean();
+    res.json(positions);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get("/sessions/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid session id" });
+    }
+    const session = await Session.findById(id);
+    if (!session) {
+      return res.status(404).json({ message: "Session not found" });
+    }
+    res.json(session);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
